@@ -45,13 +45,15 @@ body {
   }
 
 
-header {
+header{
     height: 60px;
     z-index: 1;
     width: 100%;
-    background-color: aquamarine;
     background-image: url(canpas_blur.jpg);
 }
+
+
+
 
 .header-logo {
     float: left;
@@ -90,4 +92,6 @@ main {
     width: 100%;
 } */
 
+
+/* ======================= */
 

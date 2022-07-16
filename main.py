@@ -6,6 +6,38 @@ from flask import Flask, render_template, request, redirect, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_basicauth import BasicAuth
 
+# 機械学習追加要素1_開始
+import pandas as pd
+from janome.tokenizer import Tokenizer
+from janome.analyzer import Analyzer
+from janome.charfilter import *
+from janome.tokenfilter import *
+
+char_filters = [UnicodeNormalizeCharFilter()]
+token_filters = [
+    POSKeepFilter(['名詞', '形容詞']),
+    POSStopFilter(['名詞,数','名詞,代名詞','名詞,非自立','名詞,接頭','名詞,接尾']),
+    LowerCaseFilter()
+]
+stopwords = []
+tokenizer = Tokenizer()
+analyzer = Analyzer(char_filters=char_filters, tokenizer=tokenizer, token_filters=token_filters)
+
+def token2wakati(tokens):
+    return ' '.join(t.base_form for t in tokens)
+def TextScore(document, Dic):
+    total = 0
+    for e in token2wakati(analyzer.analyze(document)).split():
+        if e in Dic.keys():
+            total+=Dic[e]
+    if total>0:
+        return "ポジティブ！",total
+    elif total==0:
+        return "なんともいえない..",total
+    else:
+        return "ネガティブかも？",total
+
+# 機械学習追加要素1_終了
 
 app = Flask(__name__)
 app.config['SECRET_KEY']= 'secret key'
@@ -60,8 +92,18 @@ def index():
             session['draft'] = content
             return redirect('/')
 
-        new_post = Post(content=request.form.get('content'),
+        # 機械学習追加要素2_開始
+        df = pd.read_csv("./model/emotion_model.csv")
+        name_list = df["name"].values
+        score_list = df["score"].values
+        Dic = {}
+        for i in range(len(name_list)):
+            Dic[name_list[i]] = score_list[i]
+        add_info = TextScore(content, Dic)
+
+        new_post = Post(content= add_info[0]+"："+request.form.get('content')+"--感情値："+str(round(add_info[1],4)),
                         created_at=datetime.now())
+        # 機械学習追加要素2_終了
 
         db.session.add(new_post)
         db.session.commit()

@@ -18,10 +18,7 @@
                         <a href="{{ url_for('about')}}">掲示板について</a>
                     </li>
                     <li>
-                        <a href="https://uoh-dakken.com/">DA研</a>
-                    </li>
-                    <li>
-                        <a href="https://www.u-hyogo.ac.jp/">兵庫県立大学</a>
+                        <a href="/admin">管理者</a>
                     </li>
                 </ul>
             </div>
@@ -30,7 +27,12 @@
             {% block body %}{% endblock %}
         </main>
         <footer>
-            管理者は<a href="/admin">こちら</a>
+            <li>
+                <a href="https://uoh-dakken.com/">データ研究会</a>
+            </li>
+            <li>
+                <a href="https://www.u-hyogo.ac.jp/">兵庫県立大学</a>
+            </li>
         </footer>
     </body>
 </html>
