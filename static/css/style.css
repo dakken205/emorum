@@ -1,0 +1,93 @@
+
+* {
+    box-sizing: border-box;
+  }
+
+html {
+    font: 100%/1.5 'Avenir Next', 'Hiragino Sans', sans-serif;
+    line-height: 1.7;
+    letter-spacing: 1px;
+    background-color: #f5f8fa;
+}
+
+ul, li {
+    list-style-type: none;
+    float: left;
+    padding: 0px 20px;
+}
+
+a {
+    text-decoration: none;
+    color: #2d3133;
+    font-size: 14px;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+    margin: 0;
+}
+
+input {
+    width: 75px;
+    float: left;
+}
+
+
+hr {width: 50%;
+    margin: 1% 25%;}
+
+
+
+/* ======================= */
+body {
+    /* color: #2d3133; */
+    /* background-color: #3ecdc6; */
+    margin: 0;
+    min-height: 1vh;
+  }
+
+
+header {
+    height: 60px;
+    z-index: 1;
+    width: 100%;
+    background-color: aquamarine;
+    background-image: url(canpas_blur.jpg);
+}
+
+.header-logo {
+    float: left;
+    padding-left: 20px;
+    color: white;
+    font-size: 22px;
+    line-height: 64px;
+}
+
+.header-logo a{
+    color: black;
+    font-size: 22px;
+}
+
+.header-links {
+    float: right;
+    padding: 20px 20px;
+}
+
+main {
+    background-color: #f5f8fa;
+}
+
+.card-date {
+    float: right;
+}
+
+.message {
+    color: red;
+}
+/* footer {
+    height: 64px;
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+} */
+
+

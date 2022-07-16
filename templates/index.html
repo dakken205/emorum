@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+
+<hr>
+
+<div class="container">
+  <form action="/" method="post">
+    <div class="card">
+      <textarea class="form-control" name="content" placeholder="オープンキャンパスはどうでしたか？" id="floatingTextarea">{{draft}}</textarea>
+      <input type="submit" value="書き込む">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <h6 class="message">{{ message }}</h6>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+  </div>
+  </form>
+  {% for post in posts %}
+  <div class="card">
+      <div class="card-body">
+        <h6 class="card-title">{{ post.content }}</h6>
+        <a class="card-date">{{ f(post.created_at, now) }}</a>
+      </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

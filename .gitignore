@@ -1,0 +1,4 @@
+__pycache__/
+.flask_env/
+IDEA.md
+random.ipynb
