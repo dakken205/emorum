@@ -1,0 +1,19 @@
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Created_at</th>
+        <th>Content</th>
+        <th></th>
+    </tr>
+    {% for post in posts %}
+    <tr>
+        <form action="{{ url_for('delete', post_id=post.id) }}" method="post">
+            <th>{{ post.id }}</th>
+            <th>{{ post.created_at }}</th>
+            <th>{{ post.content }}</th>
+            <th><input type="submit" value="削除"></th>
+        </form>
+    </tr>
+    {% endfor %}
+</table>

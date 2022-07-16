@@ -4,13 +4,20 @@ from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, flash, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_basicauth import BasicAuth
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///postdata.db'
 app.config['SECRET_KEY']= 'secret key'
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///postdata.db'
 db = SQLAlchemy(app)
+
+app.config['BASIC_AUTH_USERNAME'] = 'dakken'
+app.config['BASIC_AUTH_PASSWORD'] = 'da2022'
+
+basic_auth = BasicAuth(app)
+
 
 
 class Post(db.Model):
@@ -65,8 +72,22 @@ def index():
 def about():
     return render_template('about.html')
 
-@app.route('/admin', methods=['GET', 'POST'])
-def administrate():
+
+@app.route('/admin')
+@basic_auth.required
+def admin():
+    return render_template('manage.html', posts=Post.query.all())
+
+@app.route('/del/<int:post_id>', methods=['POST'])
+@basic_auth.required
+def delete(post_id):
+    db.session.delete(Post.query.get(post_id))
+    db.session.commit()
+    return redirect('/admin')
+
+@app.route('/edit/<int:post_id>', methods=['GET', 'POST'])
+@basic_auth.required
+def edit(post_id):
     ...
 
 if __name__ == '__main__':
