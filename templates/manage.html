@@ -5,15 +5,15 @@
         <th>Created_at</th>
         <th>Content</th>
         <th></th>
+        <th></th>
     </tr>
     {% for post in posts %}
     <tr>
-        <form action="{{ url_for('delete', post_id=post.id) }}" method="post">
-            <th>{{ post.id }}</th>
-            <th>{{ post.created_at }}</th>
-            <th>{{ post.content }}</th>
-            <th><input type="submit" value="削除"></th>
-        </form>
+        <th>{{ post.id }}</th>
+        <th>{{ post.created_at }}</th>
+        <th>{{ post.content }}</th>
+        <th><a href="/edit/{{ post.id }}" class="edit">編集</a></th>
+        <th><a href="/del/{{ post.id }}" class="del">削除</a></th>
     </tr>
     {% endfor %}
 </table>

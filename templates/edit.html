@@ -1,0 +1,6 @@
+<form action="{{ url_for('edit', post_id=post.id) }}" method="post">
+    <textarea name="content" style="width: 500px; height: 200px;">
+        {{post.content}}
+    </textarea>
+    <input type="submit" value="更新">
+</form>

@@ -14,7 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///postdata.db'
 db = SQLAlchemy(app)
 
 app.config['BASIC_AUTH_USERNAME'] = 'dakken'
-app.config['BASIC_AUTH_PASSWORD'] = 'da2022'
+app.config['BASIC_AUTH_PASSWORD'] = '2022'
 
 basic_auth = BasicAuth(app)
 
@@ -78,7 +78,7 @@ def about():
 def admin():
     return render_template('manage.html', posts=Post.query.all())
 
-@app.route('/del/<int:post_id>', methods=['POST'])
+@app.route('/del/<int:post_id>')
 @basic_auth.required
 def delete(post_id):
     db.session.delete(Post.query.get(post_id))
@@ -88,7 +88,13 @@ def delete(post_id):
 @app.route('/edit/<int:post_id>', methods=['GET', 'POST'])
 @basic_auth.required
 def edit(post_id):
-    ...
+    post = Post.query.get(post_id)
+    if request.method == 'GET':
+        return render_template('edit.html', post=post)
+    if request.method == 'POST':
+        post.content = request.form.get('content')
+        db.session.commit()
+        return redirect('/admin')
 
 if __name__ == '__main__':
     app.run(debug=True)
