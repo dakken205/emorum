@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from bisect import bisect_left
 
 
 def convert_emotion_value_to_text(emotion_value: float) -> str:
@@ -13,8 +12,8 @@ def convert_emotion_value_to_text(emotion_value: float) -> str:
         return 'なんともいえない..'
 
 def convert_emotion_value_to_rgba(emotion_value: float) -> str:
-    coe = round(- 255 / 2 * emotion_value + 255 / 2)
-    return f'rgba({coe}, {255-coe}, 0, 0.4)'
+    coe = round(- 255 / 2 * (emotion_value - .1) + 255 / 2)
+    return f'rgba({coe}, {255-coe}, 0, 0.3)'
 
 
 def format_time_delta(before: datetime, after: datetime) -> str:
