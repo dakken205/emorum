@@ -3,6 +3,9 @@
 {% block body %}
 
 <hr>
+<p class="announcement">
+  書き込みの前に<a href="/about">投稿のルール</a>をお読みください．
+</p>
 
 <div class="container">
   <form action="/" method="post">
@@ -20,9 +23,12 @@
   </form>
   {% for post in posts %}
   <div class="card">
-      <div class="card-body">
+      <div class="card-body" style="background-color: {{ layer(post.emotion_value) }}">
+        {{rgba}}
         <h6 class="card-title">{{ post.content }}</h6>
-        <a class="card-date">{{ f(post.created_at, now) }}</a>
+        <a> {{ classifier(post.emotion_value) }}</a>
+        <a class="card-emotion">感情値: {{ post.emotion_value }}</a>
+        <a class="card-date">{{ formatter(post.created_at, now) }}</a>
       </div>
   </div>
   {% endfor %}

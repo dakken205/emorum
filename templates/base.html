@@ -3,22 +3,22 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-        <title>DA研 掲示板</title>
+        <title>dakken-forum</title>
         <link rel="stylesheet" href="static/css/style.css">
         {% block head %}{% endblock %}
     </head>
     <body>
         <header>
             <div class="header-logo">
-                <a href="{{ url_for('index') }}">掲示板</a>
+                <a href="{{ url_for('index') }}">DA研の掲示板</a>
             </div>
             <div class="header-links">
                 <ul>
                     <li>
-                        <a href="{{ url_for('about')}}">掲示板について</a>
+                        <a href="{{ url_for('about') }}">about</a>
                     </li>
                     <li>
-                        <a href="/admin">管理者</a>
+                        <a href="/admin">admin</a>
                     </li>
                 </ul>
             </div>
@@ -27,12 +27,14 @@
             {% block body %}{% endblock %}
         </main>
         <footer>
-            <li>
-                <a href="https://uoh-dakken.com/">データ研究会</a>
-            </li>
-            <li>
-                <a href="https://www.u-hyogo.ac.jp/">兵庫県立大学</a>
-            </li>
+            <ul class="footer-links">
+                <li>
+                    <a href="https://uoh-dakken.com/">データ分析研究会(DA研)</a>
+                </li>
+                <li>
+                    <a href="https://www.u-hyogo.ac.jp/">兵庫県立大学</a>
+                </li>
+            </ul>
         </footer>
     </body>
 </html>

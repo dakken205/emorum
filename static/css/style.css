@@ -16,6 +16,11 @@ ul, li {
     padding: 0px 20px;
 }
 
+.announcement {
+    text-align: center;
+
+}
+
 a {
     text-decoration: none;
     color: #2d3133;
@@ -78,12 +83,17 @@ main {
 }
 
 .card-date {
+    float: left
+}
+
+.card-date {
     float: right;
 }
 
 .message {
     color: red;
 }
+
 
 /* footer {
     height: 64px;
@@ -92,6 +102,9 @@ main {
     width: 100%;
 } */
 
+.footer-links {
+    float: right;
+}
 
 /* ======================= */
 

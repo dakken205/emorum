@@ -1,9 +1,11 @@
+<a href="/">戻る</a>
 
 <table>
     <tr>
         <th>ID</th>
         <th>Created_at</th>
         <th>Content</th>
+        <th>Emotion</th>
         <th></th>
         <th></th>
     </tr>
@@ -12,6 +14,7 @@
         <th>{{ post.id }}</th>
         <th>{{ post.created_at }}</th>
         <th>{{ post.content }}</th>
+        <th>{{ post.emotion_value }}</th>
         <th><a href="/edit/{{ post.id }}" class="edit">編集</a></th>
         <th><a href="/del/{{ post.id }}" class="del">削除</a></th>
     </tr>
