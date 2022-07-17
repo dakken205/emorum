@@ -6,7 +6,7 @@ from bisect import bisect_left
 import numpy as np
 
 
-def convert_emotion_value_to_text(emotion_value: float, border: float | int = .0) -> str:
+def convert_emotion_value_to_text(emotion_value: float, border: "float | int" = .0) -> str:
     '''
     感情値をラベリングします．
     '''
