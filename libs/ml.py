@@ -8,38 +8,44 @@ from janome.charfilter import UnicodeNormalizeCharFilter
 from janome.tokenfilter import POSKeepFilter, POSStopFilter, LowerCaseFilter
 
 
-tokenizer = Tokenizer()
-token_filters = [
-    POSKeepFilter(['名詞',
-                   '形容詞',
-                   ]),
-    POSStopFilter(['名詞, 数',
-                   '名詞, 代名詞',
-                   '名詞, 非自立',
-                   '名詞, 接頭',
-                   '名詞, 接尾',
-                   ]),
-    LowerCaseFilter()
-]
-char_filters = [UnicodeNormalizeCharFilter()]
-stopwords = []
-analyzer = Analyzer(char_filters=char_filters,
-                    tokenizer=tokenizer,
-                    token_filters=token_filters)
-
-
 def token2wakati(tokens):
     return ' '.join(t.base_form for t in tokens)
 
 
 def TextScore(document):
-    total = 0
-    for e in token2wakati(analyzer.analyze(document)).split():
-        if e in Dic.keys():
-            total += Dic[e]
-    return total
+    return sum(dic.get(e, 0)
+               for e in token2wakati(analyzer.analyze(document)).split())
+
+
+tokenizer = Tokenizer()
+
+token_filters = [
+    POSKeepFilter([
+        '名詞',
+        '形容詞',
+    ]),
+    POSStopFilter([
+        '名詞, 数',
+        '名詞, 代名詞',
+        '名詞, 非自立',
+        '名詞, 接頭',
+        '名詞, 接尾',
+    ]),
+    LowerCaseFilter(),
+]
+
+char_filters = [
+    UnicodeNormalizeCharFilter(),
+]
+
+stopwords = []
+
+analyzer = Analyzer(char_filters=char_filters,
+                    tokenizer=tokenizer,
+                    token_filters=token_filters
+                    )
 
 
 df = pd.read_csv("./model/emotion_model.csv")
 
-Dic = dict(df[['name', 'score']].values)
+dic = dict(df[['name', 'score']].values)

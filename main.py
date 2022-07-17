@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import re
 from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, flash, session
