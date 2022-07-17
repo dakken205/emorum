@@ -14,7 +14,7 @@ def token2wakati(tokens):
 
 def TextScore(document):
     return sum(dic.get(e, 0)
-               for e in token2wakati(analyzer.analyze(document)).split())
+               for e in token2wakati(analyzer.analyze(document)).split())+dic["+切片"]
 
 
 tokenizer = Tokenizer()
