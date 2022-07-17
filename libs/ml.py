@@ -32,7 +32,7 @@ def token2wakati(tokens):
     return ' '.join(t.base_form for t in tokens)
 
 
-def TextScore(document, Dic):
+def TextScore(document):
     total = 0
     for e in token2wakati(analyzer.analyze(document)).split():
         if e in Dic.keys():
