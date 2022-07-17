@@ -1,38 +1,44 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
 from datetime import datetime
 from bisect import bisect_left
 
 import numpy as np
 
 
-def convert_emotion_value_to_text(emotion_value: float, border: "float | int" = .0) -> str:
+def convert_emotion_value_to_text(emotion_value: float) -> str:
     '''
-    感情値をラベリングします．
+    感情値に応じたラベルを返します．
     '''
-    if emotion_value < border:
-        return 'ネガティブかも？'
-    if emotion_value > border:
-        return 'ポジティブ！'
-    if emotion_value == border:
+    if emotion_value == -.1:
         return 'なんともいえない..'
+    if emotion_value < 0:
+        return 'ネガティブかも？'
+    if emotion_value >= 0:
+        return 'ポジティブ！'
 
 
 def convert_emotion_value_to_rgba(emotion_value: float, sep: int = None) -> str:
     '''
-    感情値をrgba値に変換します．sep段階の断続値に，sep引数が与えられない場合は連続値に変換されます．
+    感情値からrgba値を返します．
+    sep引数が与えられた場合，<sep>段階の断続的な値を，
+    sep引数が与えられない場合，rgb(0,255,0)~rgb(255,0,0)までの連続的な値を返します．
+    特に感情値が-0.1の場合，背景色は適用されません．
     >>> convert_emotion_value_to_rgba(1)
     'rgba(0, 255, 0, 0.3)'
     >>> convert_emotion_value_to_rgba(-1)
-    'rgba(255, 0, 0, 0.3)
+    'rgba(255, 0, 0, 0.3)'
     '''
+    if emotion_value == -.1:
+        return 'rgba(0, 0, 0, 0)'
     if sep is None:
-        coe = round(255 / 2 * (emotion_value - .1) + 255 / 2)
+        coef = round(255 / 2 * emotion_value + 255 / 2)
     else:
         breakpoints = np.linspace(-1, 1, sep)
         coes = np.append(np.linspace(0, 255, sep), 255)
-        coe = round(coes[bisect_left(breakpoints, emotion_value)])
-    return f'rgba({255-coe}, {coe}, 0, 0.3)'
+        coef = round(coes[bisect_left(breakpoints, emotion_value)])
+    return f'rgba({255-coef}, {coef}, 0, 0.2)'
 
 
 def format_time_delta(before: datetime, after: datetime) -> str:

@@ -23,7 +23,7 @@
   </form>
   {% for post in posts %}
   <div class="card">
-      <div class="card-body" style="background-color: {{ layer(post.emotion_value, 3) }}">
+      <div class="card-body" style="background-color: {{ layer(post.emotion_value, 4) }}">
         <h6 class="card-title">{{ post.content }}</h6>
         <a> {{ classifier(post.emotion_value) }}</a>
         <a class="card-emotion">感情値: {{ post.emotion_value }}</a>

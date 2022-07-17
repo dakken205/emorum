@@ -45,7 +45,7 @@ def index():
                                )
 
     if request.method == 'POST':
-        content = request.form.get('content')
+        content = request.form.get('content').strip()
 
         # validation
         if not 1 < len(content) < 140:
@@ -78,6 +78,16 @@ def admin():
 @basic_auth.required
 def delete(post_id):
     db.session.delete(Post.query.get(post_id))
+    db.session.commit()
+    return redirect('/admin')
+
+
+@app.route('/del/all')
+@basic_auth.required
+def delete_all():
+    with open('contents.txt', mode='w', encoding='utf-8') as f:
+        f.write('\n'.join(post.content for post in Post.query.all()))
+    Post.query.delete()
     db.session.commit()
     return redirect('/admin')
 
