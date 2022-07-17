@@ -35,11 +35,9 @@ class Post(db.Model):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        now = datetime.now()
-        posts = reversed(Post.query.order_by('created_at').all())
         return render_template('index.html',
-                               posts=posts,
-                               now=now,
+                               posts=reversed(Post.query.order_by('created_at').all()),
+                               now=datetime.now(),
                                formatter=format_time_delta,
                                classifier=convert_emotion_value_to_text,
                                layer=convert_emotion_value_to_rgba,
@@ -92,6 +90,7 @@ def edit(post_id):
         return render_template('edit.html', post=post)
     if request.method == 'POST':
         post.content = request.form.get('content')
+        post.emotion_value = request.form.get('emotion')
         db.session.commit()
         return redirect('/admin')
 
