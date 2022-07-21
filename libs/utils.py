@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import annotations
 from datetime import datetime
 from bisect import bisect_left
 
@@ -46,12 +45,12 @@ def format_time_delta(before: datetime, after: datetime) -> str:
     前後のdatetimeの差分を最大の単位を付与して返します．
     '''
     delta = (after - before).seconds
-    if (days := delta // 86400):
-        return f'{days}日前'
-    if (hours := delta // 3600):
-        return f'{hours}時間前'
-    if (minutes := delta // 60):
-        return f'{minutes}分前'
-    if (seconds := delta // 1):
-        return f'{seconds}秒前'
+    if delta // 86400:
+        return f'{delta // 86400}日前'
+    if delta // 3600:
+        return f'{delta // 3600}時間前'
+    if delta // 60:
+        return f'{delta // 60}分前'
+    if delta // 1:
+        return f'{delta // 1}秒前'
     return f'ちょっと前'
