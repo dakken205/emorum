@@ -86,8 +86,8 @@ class Evaluator:
         token_filters=_token_filters,
     )
 
-    with open("./model/emotion_model.json", "r") as f:
-        model: t.Final[dict[str, float]] = json.load(f)
+    with open("./emorum/model/emotion_model.json", "r") as f:
+        _model: t.Final[dict[str, float]] = json.load(f)
 
     _intercept: t.Final[float] = -0.1
 
@@ -104,7 +104,7 @@ class Evaluator:
     def _to_emotion_value(cls, text: str) -> float:
         return (
             sum(
-                cls.model.get(token.base_form, 0)
+                cls._model.get(token.base_form, 0)
                 for token in cls._analyzer.analyze(text)
             )
             + cls._intercept

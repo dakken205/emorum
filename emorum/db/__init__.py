@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import os
 import typing as t
 
-import dotenv
-import sqlalchemy
 import sqlalchemy.orm as orm
-
-dotenv.load_dotenv()  # type: ignore
 
 
 class Base(orm.DeclarativeBase):
@@ -83,7 +78,3 @@ class Post(Base):
 
     def __repr__(self) -> str:
         return f"<Post(id={self.id}, content={self.content})>"
-
-
-engine = sqlalchemy.create_engine(os.environ["DATABASE_URI"])
-Base.metadata.create_all(engine)

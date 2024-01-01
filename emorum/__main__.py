@@ -14,8 +14,8 @@ from flask.globals import session as flask_session
 from flask.helpers import url_for
 from flask.templating import render_template
 
-from db import Post, User
-from libs import Evaluator
+from .db import Base, Post, User
+from .libs import Evaluator
 
 dotenv.load_dotenv()  # type: ignore
 
@@ -23,8 +23,8 @@ dotenv.load_dotenv()  # type: ignore
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 
-DATABASE_URI = os.environ["DATABASE_URI"]
-engine = sqlalchemy.create_engine(DATABASE_URI)
+engine = sqlalchemy.create_engine(os.environ["DATABASE_URI"])
+Base.metadata.create_all(engine)
 
 
 @app.before_request
