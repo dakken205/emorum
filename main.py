@@ -1,109 +1,213 @@
 # -*- coding: utf-8 -*-
 
+import os
 from datetime import datetime
 
-from flask import Flask, render_template, request, redirect, flash, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_basicauth import BasicAuth
+import dotenv
+import sqlalchemy
+import sqlalchemy.orm as orm
+from bleach import clean
+from flask import flash, redirect
+from flask.app import Flask
+from flask.globals import request
+from flask.globals import session as flask_session
+from flask.helpers import url_for
+from flask.templating import render_template
 
-from libs import (TextScore,
-                  format_time_delta,
-                  convert_emotion_value_to_text,
-                  convert_emotion_value_to_rgba,
-                  )
+from db import Post, User
+from libs import Evaluator
+
+dotenv.load_dotenv()  # type: ignore
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret key'
+app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/posts.db '
-db = SQLAlchemy(app)
-
-app.config['BASIC_AUTH_USERNAME'] = 'dakken'
-app.config['BASIC_AUTH_PASSWORD'] = 'da2022'
-
-basic_auth = BasicAuth(app)
+DATABASE_URI = os.environ["DATABASE_URI"]
+engine = sqlalchemy.create_engine(DATABASE_URI)
 
 
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text, nullable=False)
-    emotion_value = db.Column(db.Integer, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False)
+@app.before_request
+def before_request():
+    flask_session["SIGN_IN_USER_ID"] = "Anonymous"
+    flask_session["SIGN_IN_USER_NAME"] = "Anonymous"
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.get("/")
 def index():
-    if request.method == 'GET':
-        return render_template('index.html',
-                               posts=reversed(Post.query.order_by('created_at').all()),
-                               now=datetime.now(),
-                               formatter=format_time_delta,
-                               classifier=convert_emotion_value_to_text,
-                               layer=convert_emotion_value_to_rgba,
-                               draft=session.get('draft', ''),
-                               )
-
-    if request.method == 'POST':
-        content = request.form.get('content').strip()
-
-        # validation
-        if not 1 < len(content) < 140:
-            flash('投稿は1～140文字に制限されています')
-            session['draft'] = content
-            return redirect('/')
-
-        new_post = Post(content=content,
-                        emotion_value=round(TextScore(content), 3),
-                        created_at=datetime.now())
-
-        db.session.add(new_post)
-        db.session.commit()
-        session['draft'] = ''
-        return redirect('/')
+    return render_template(
+        "index.html",
+        posts=reversed(posts_all()),
+    )
 
 
-@app.route('/about')
+@app.route("/about")
 def about():
-    return render_template('about.html')
+    return render_template("about.html")
 
 
-@app.route('/admin')
-@basic_auth.required
-def admin():
-    return render_template('manage.html', posts=Post.query.all())
+@app.route("/guideline")
+def guideline():
+    return render_template("guideline.html")
 
 
-@app.route('/del/<int:post_id>')
-@basic_auth.required
-def delete(post_id):
-    db.session.delete(Post.query.get(post_id))
-    db.session.commit()
-    return redirect('/admin')
+@app.get("/signin")
+def signin():
+    return render_template("signin.html")
 
 
-@app.route('/del/all')
-@basic_auth.required
-def delete_all():
-    with open('contents.txt', mode='w', encoding='utf-8') as f:
-        f.write('\n'.join(post.content for post in Post.query.all()))
-    Post.query.delete()
-    db.session.commit()
-    return redirect('/admin')
+@app.get("/signup")
+def signup():
+    return render_template("signup.html")
 
 
-@app.route('/edit/<int:post_id>', methods=['GET', 'POST'])
-@basic_auth.required
-def edit(post_id):
-    post = Post.query.get(post_id)
-    if request.method == 'GET':
-        return render_template('edit.html', post=post)
-    if request.method == 'POST':
-        post.content = request.form.get('content')
-        post.emotion_value = request.form.get('emotion')
-        db.session.commit()
-        return redirect('/admin')
+@app.post("/signin/")
+def api_signin():
+    data = request.form
+
+    with orm.Session(engine) as session:
+        user = session.get(User, data.get("user-id"))
+        if user is None or user.id != data.get("user-id"):
+            flash("ユーザ名またはパスワードが間違っています。")
+            return redirect(url_for("signin"))
+
+        flask_session["SIGN_IN_USER_ID"] = user.id
+        flask_session["SIGN_IN_USER_NAME"] = user.name
+        return redirect(url_for("index"))
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.post("/signup/")
+def create_new_user():
+    data = request.form
+    user_id = str(data.get("user-id"))
+    user_name = str(data.get("user-name"))
+    password = str(data.get("password"))
+
+    with orm.Session(engine) as session:
+        user = session.get(User, user_id)
+        if user is not None:
+            flash("そのIDは既に使われています。")
+            return redirect(url_for("signup"))
+
+        new_user = User(
+            id=user_id,
+            name=user_name,
+            password=password,
+            created_at=datetime.now(),
+        )
+
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+
+    flask_session["SIGN_IN_USER_ID"] = user_id
+    flask_session["SIGN_IN_USER_NAME"] = user_name
+    return redirect(url_for("index"))
+
+
+@app.get("/signout")
+def signout():
+    del flask_session["SIGN_IN_USER_ID"]
+    del flask_session["SIGN_IN_USER_NAME"]
+    return redirect(url_for("index"))
+
+
+@app.get("/posts/")
+def posts_all():
+    order = request.args.get("ordering", "date-asc")
+    match order:
+        case "date-asc":
+            order = Post.created_at
+        case "date-desc":
+            order = Post.created_at.desc()
+        case "emotion-asc":
+            order = Post.emotion_value
+        case "emotion-desc":
+            order = Post.emotion_value.desc()
+        case _:
+            order = Post.created_at
+
+    with orm.Session(engine) as session:
+        posts = session.query(Post).order_by(order).all()
+        return [post.serialize() for post in posts]
+
+
+@app.get("/posts/<int:post_id>/")
+def posts(post_id: int):
+    with orm.Session(engine) as session:
+        post = session.get(Post, post_id)
+
+        if post is None:
+            return {"ok": False}
+        else:
+            return {
+                "ok": True,
+                "data": post.serialize(),
+            }
+
+
+@app.post("/posts/")
+def create_new_post():
+    data = request.form
+    content = data.get("content", "")
+
+    if not 0 < len(content) < 140:
+        flash("投稿は1文字以上140字以下に制限されています。")
+        return redirect(url_for("index"))
+
+    # sanitize
+    content = clean(
+        content,
+        tags=[
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "p",
+            "q",
+            "big",
+            "b",
+            "small",
+            "i",
+            "u",
+            "tt",
+            "strike",
+        ],
+    )
+
+    emotion = Evaluator.evaluate(content)
+
+    with orm.Session(engine) as session:
+        author_id = flask_session.get("SIGN_IN_USER_ID") or "Anonymous"  # type: ignore
+        new_post = Post(
+            author_id=author_id,
+            content=content,
+            emotion_value=round(emotion.value, 3),
+            emotion_label=emotion.label,
+            color=f"rgba({emotion.rgb.r}, {emotion.rgb.g}, {emotion.rgb.b}, 0.7)",
+            sender_addr=request.remote_addr,
+            created_at=datetime.now(),
+        )
+        session.add(new_post)
+        session.commit()
+        session.refresh(new_post)
+
+    return redirect(url_for("index"))
+
+
+@app.delete("/posts/<int:post_id>/")
+def delete_post(post_id: int):
+    with orm.Session(engine) as session:
+        post = session.get(Post, post_id)
+        if post is None:
+            return {"ok": False, "msg": "投稿が見つかりませんでした。"}
+        else:
+            session.delete(post)
+            session.commit()
+            return {"ok": True}
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=8000)

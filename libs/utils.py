@@ -1,56 +1,56 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
-from bisect import bisect_left
+import dataclasses
+import datetime
 
-import numpy as np
-
-
-def convert_emotion_value_to_text(emotion_value: float) -> str:
-    '''
-    感情値に応じたラベルを返します．
-    '''
-    if emotion_value == -.1:
-        return 'なんともいえない..'
-    if emotion_value < 0:
-        return 'ネガティブかも？'
-    if emotion_value >= 0:
-        return 'ポジティブ！'
+__all__ = [
+    "RGB",
+    "format_time_delta",
+]
 
 
-def convert_emotion_value_to_rgba(emotion_value: float, sep: int = None) -> str:
-    '''
-    感情値からrgba値を返します．
-    sep引数が与えられた場合，<sep>段階の断続的な値を，
-    sep引数が与えられない場合，rgb(0,255,0)~rgb(255,0,0)までの連続的な値を返します．
-    特に感情値が-0.1の場合，背景色は適用されません．
-    >>> convert_emotion_value_to_rgba(1)
-    'rgba(0, 255, 0, 0.3)'
-    >>> convert_emotion_value_to_rgba(-1)
-    'rgba(255, 0, 0, 0.3)'
-    '''
-    if emotion_value == -.1:
-        return 'rgba(0, 0, 0, 0)'
-    if sep is None:
-        coef = round(255 / 2 * emotion_value + 255 / 2)
-    else:
-        breakpoints = np.linspace(-1, 1, sep)
-        coes = np.append(np.linspace(0, 255, sep), 255)
-        coef = round(coes[bisect_left(breakpoints, emotion_value)])
-    return f'rgba({255-coef}, {coef}, 0, 0.2)'
+@dataclasses.dataclass
+class RGB:
+    r: int
+    g: int
+    b: int
+
+    def __repr__(self) -> str:
+        return f"rgb({self.r}, {self.g}, {self.b})"
 
 
-def format_time_delta(before: datetime, after: datetime) -> str:
-    '''
-    前後のdatetimeの差分を最大の単位を付与して返します．
-    '''
-    delta = (after - before).seconds
-    if delta // 86400:
-        return f'{delta // 86400}日前'
-    if delta // 3600:
-        return f'{delta // 3600}時間前'
-    if delta // 60:
-        return f'{delta // 60}分前'
-    if delta // 1:
-        return f'{delta // 1}秒前'
-    return f'ちょっと前'
+def format_time_delta(before: datetime.datetime, after: datetime.datetime) -> str:
+    """
+    datetimeの差分のうち、値が1以上となる最大の単位の部分を返す。
+
+    >>> from datetime import datetime
+    >>> format_time_delta(datetime(2021, 1, 1, 0, 0, 0),
+    ...                   datetime(2021, 1, 1, 0, 0, 30))
+    '30秒前'
+    >>> format_time_delta(datetime(2021, 1, 1, 0, 0, 0),
+    ...                   datetime(2021, 1, 4, 0, 0, 0))
+    '3日前'
+    >>> format_time_delta(datetime(2021, 1, 1, 0, 0, 0),
+    ...                   datetime(2021, 1, 1, 0, 0, 0))
+    'ちょっと前'
+    """
+
+    delta_day = (after - before).days
+    delta_sec = (after - before).seconds
+
+    if delta_day:
+        return f"{delta_day}日前"
+    if delta_sec // 3600:
+        return f"{delta_sec // 3600}時間前"
+    if delta_sec // 60:
+        return f"{delta_sec // 60}分前"
+    if delta_sec // 1:
+        return f"{delta_sec // 1}秒前"
+
+    return "ちょっと前"
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()
